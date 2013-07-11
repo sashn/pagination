@@ -12,16 +12,16 @@
         validatePage: function() {
             // ...
         },
-        getLinkForNextPage: function() {
+        getUrlForNextPage: function() {
             // ...
         },
-        getLinkForPreviousPage: function() {
+        getUrlForPreviousPage: function() {
             // ...
         },
-        validatePage: function() {
+        loadUrlContent: function() {
             // ...
         },
-        getLinkForPage: function(page) {
+        getUrlForPage: function(page) {
             // ...
         }
         // ...
