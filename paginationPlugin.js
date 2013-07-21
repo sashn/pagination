@@ -1,85 +1,99 @@
+
 ;(function($) {
-    
-    var methods = {
 
-        init: function(options) {
-            return this.each(function() {
-                this.options = $.extend({}, $.fn.pagination.defaultOptions, options);
-                console.log(this.options);
+    "use strict";
 
-                var o = this.options;
+    var Pagination = function (options) {
+        this.init(options);
+    }
 
-                $(o.selectorPrev).bind("click", function (e) {
-                    e.preventDefault();
-                    var $el = e.currentTarget;
+    Pagination.prototype = {
+        defaults: {
+            currentPage: 1,
+            pageCount: 10,
+            selectorPrev: "a.prev",
+            selectorNext: "a.next",
+            selectorPage: "input.page",
+            selectorPageCount: ".pagecount",
+            selectorContent: ".content"
+        },
+        init: function (options) {
+            this.options = $.extend({}, this.defaults, options);
 
-                    //if currentPage != first
-                    if (!methods.isFirstPage(o.currentPage)) {
-                        console.log("go to prev page");
+            var o = this.options,
+                that = this;
 
-                        //--currentPage
-                        o.currentPage -= 1;
+            $(o.selectorPrev).attr("href", that.getUrlForPreviousPage()).bind("click", function (e) {
+                e.preventDefault();
+                var $el = $(e.currentTarget);
 
-                        //load content
-                        methods.loadAjaxResponseToContainer($el.attr("href"), o.selectorContent);
-                        
-                        //set new links for prev & next button
-                        $(o.selectorPrev).attr("href", methods.getUrlForPreviousPage);
-                        $(o.selectorNext).attr("href", methods.getUrlForNextPage);
+                //if currentPage != first
+                if (!that.isFirstPage()) {
+                    console.log("go to prev page");
 
-                        //set new textfield value
-                        $(o.selectorPage).val(o.currentPage);
-                    }
-                });
-
-                $(o.selectorNext).bind("click", function (e) {
-                    e.preventDefault();
-                    var $el = e.currentTarget;
-
-                    //if currentPage != first
-                    if (!methods.isLastPage(o.currentPage, o.pageCount)) {
-                        console.log("go to next page");
-
-                        //--currentPage
-                        o.currentPage += 1;
-
-                        //load content
-                        methods.loadAjaxResponseToContainer($el.attr("href"), o.selectorContent);
-                        
-                        //set new links for prev & next button
-                        $(o.selectorPrev).attr("href", methods.getUrlForPreviousPage);
-                        $(o.selectorNext).attr("href", methods.getUrlForNextPage);
-
-                        //set new textfield value
-                        $(o.selectorPage).val(o.currentPage);
-                    }
-                });
-
-                $(o.selectorPage).bind("blur", function (e) {
-                    e.preventDefault();
-
-                    //sanitize input
-
-                    //if valid new page
-
-                    //currentPage = new page
+                    //--currentPage
+                    o.currentPage -= 1;
 
                     //load content
-
+                    that.loadAjaxResponseToContainer($el.attr("href"), o.selectorContent);
+                    
                     //set new links for prev & next button
-                });
+                    $(o.selectorPrev).attr("href", that.getUrlForPreviousPage());
+                    $(o.selectorNext).attr("href", that.getUrlForNextPage());
 
-                // other init stuff
+                    //set new textfield value
+                    $(o.selectorPage).val(o.currentPage);
+                }
             });
+
+            $(o.selectorNext).attr("href", that.getUrlForNextPage()).bind("click", function (e) {
+                e.preventDefault();
+                var $el = $(e.currentTarget);
+
+                //if currentPage != first
+                if (!that.isLastPage()) {
+                    console.log("go to next page");
+
+                    //--currentPage
+                    o.currentPage += 1;
+
+                    //load content
+                    that.loadAjaxResponseToContainer($el.attr("href"), o.selectorContent);
+                    
+                    //set new links for prev & next button
+                    $(o.selectorPrev).attr("href", that.getUrlForPreviousPage());
+                    $(o.selectorNext).attr("href", that.getUrlForNextPage());
+
+                    //set new textfield value
+                    $(o.selectorPage).val(o.currentPage);
+                }
+            });
+
+            $(o.selectorPage).val(o.currentPage).bind("blur", function (e) {
+                e.preventDefault();
+
+                //sanitize input
+
+                //if valid new page
+
+                //currentPage = new page
+
+                //load content
+
+                //set new links for prev & next button
+            });
+
+            // other init stuff
+
         },
-        isFirstPage: function(page) {
-            if (page > 1) {
+        isFirstPage: function() {
+            if (this.options.currentPage > 1) {
                 return false;
             }
             return true;
         },
-        isLastPage: function(page, pageCount) {
-            if (page < pageCount) {
+        isLastPage: function() {
+            if (this.options.currentPage < this.options.pageCount) {
                 return false;
             }
             return true;
@@ -121,27 +135,16 @@
                 return currentUrl.replace(/\?p=[0-9]+/, "?p="+page).replace(/[&]p=[0-9]+/, "&p="+page);
             }
         }
-        // ...
-    };
-    
-    $.fn.pagination = function(method) {
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if (typeof method === 'object' || !method) {
-            return methods.init.apply(this, arguments);
-        } else {
-            $.error('Method '+method+' does not exist on jQuery.pagination');
-        }
-    };
-    
-    $.fn.pagination.defaultOptions = {
-        currentPage: 1,
-        pageCount: 10,
-        selectorPrev: "a.prev",
-        selectorNext: "a.next",
-        selectorPage: "input.page",
-        selectorPageCount: ".pagecount",
-        selectorContent: ".content"
-    };
-    
-})(jQuery);
+    }
+
+    $.fn.pagination = function (param) {
+        return this.each(function () {
+            if (typeof param == "string") {
+                $(this).data("pagination")[param]();
+            } else {
+                $(this).data("pagination", new Pagination(param));
+            }
+        });
+    }
+
+})(window.jQuery);
